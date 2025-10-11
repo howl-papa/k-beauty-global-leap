@@ -1,0 +1,31 @@
+---
+layout: default
+---
+
+<section class="archive">
+    <header class="archive-header">
+        <h1>{{ page.title | default: "아카이브" }}</h1>
+        {% if page.description %}
+            <p>{{ page.description }}</p>
+        {% endif %}
+    </header>
+
+    <div class="archive-list">
+        {% if page.type == 'tags' %}
+            {% assign items = site.tags %}
+        {% elsif page.type == 'categories' %}
+            {% assign items = site.categories %}
+        {% endif %}
+
+        {% if items %}
+            <ul>
+                {% for item in items %}
+                    <li>
+                        <a href="{{ item.path | relative_url }}">{{ item[0] }}</a>
+                        <span class="badge">{{ item[1].size }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</section>

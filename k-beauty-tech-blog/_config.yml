@@ -1,0 +1,88 @@
+# Site settings
+title: "K-Beauty Tech Blog"
+subtitle: "AI-Driven Innovation in Beauty Technology"
+description: "Exploring the intersection of AI, technology, and K-Beauty industry insights by Yongrak Park"
+author: "Yongrak Park (박용락)"
+email: "contact@yongrak.pro"
+url: "https://blog.k-beauty-leap.com"
+baseurl: ""
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+permalink: /:categories/:year/:month/:day/:title/
+paginate: 10
+paginate_path: "/page:num/"
+lang: ko-KR
+timezone: Asia/Seoul
+collections:
+  projects:
+    output: true
+    permalink: /:collection/:name/
+  case-studies:
+    output: true
+    permalink: /:collection/:name/
+
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: post
+      author: "Yongrak Park"
+      lang: ko-KR
+  - scope:
+      path: "projects"
+      type: projects
+    values:
+      layout: project
+  - scope:
+      path: "case-studies"
+      type: case-studies
+    values:
+      layout: case-study
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+  - jekyll-paginate
+  - jekyll-archives
+
+jekyll-archives:
+  enabled:
+    - categories
+    - tags
+  layout: archive
+  permalinks:
+    category: '/categories/:name/'
+    tag: '/tags/:name/'
+
+# Social links
+social:
+  github: howl-papa
+  linkedin: yongrak-pro
+  email: contact@yongrak.pro
+  portfolio: https://yongrak.pro
+
+# Google Analytics
+google_analytics: "G-XXXXXXXXXX"
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
+  - README.md
+
+# Include custom directories
+include:
+  - .htaccess
+
+# Feed settings
+feed:
+  path: feed.xml
