@@ -1,10 +1,13 @@
 """
 AI Analyzer Service
 
-Integrates OpenAI GPT-4 for:
+Comprehensive AI analysis using OpenAI GPT-4 and Anthropic Claude:
 - Sentiment analysis of Instagram posts
-- Trend insight generation
+- Trend insight generation and prediction
 - Market opportunity identification
+- Content quality evaluation
+- Influencer authenticity analysis
+- Cultural fit assessment
 - Content recommendations
 """
 
@@ -12,22 +15,47 @@ import json
 from typing import List, Dict, Optional, Any
 from datetime import datetime
 import openai
+from openai import OpenAI
 from sqlalchemy.orm import Session
+from sqlalchemy import func
+import redis
 
-from app.core.config import settings
+from app.core.config import get_settings
 from app.models.instagram_post import InstagramPost
 from app.models.instagram_hashtag import InstagramHashtag
+from app.models.instagram_influencer import InstagramInfluencer
 
 
 class AIAnalyzer:
-    """AI-powered analysis service using OpenAI GPT-4"""
+    """
+    AI-powered analysis service using OpenAI GPT-4 and Anthropic Claude
+    
+    Features:
+    - Sentiment analysis with emotion detection
+    - Trend prediction with confidence scores
+    - Content quality evaluation (visual + text)
+    - Influencer authenticity scoring
+    - Cultural fit assessment by market
+    - Result caching for cost optimization
+    """
     
     def __init__(self, db: Session):
         self.db = db
-        if settings.OPENAI_API_KEY:
-            openai.api_key = settings.OPENAI_API_KEY
+        self.settings = get_settings()
+        
+        # Initialize OpenAI client
+        if self.settings.OPENAI_API_KEY:
+            self.openai_client = OpenAI(api_key=self.settings.OPENAI_API_KEY)
         else:
-            print("⚠️  Warning: OPENAI_API_KEY not set. AI features will be disabled.")
+            self.openai_client = None
+            print("⚠️  Warning: OPENAI_API_KEY not set. AI features will use mock data.")
+        
+        # Initialize Redis cache
+        try:
+            self.cache = redis.from_url(self.settings.REDIS_URL)
+        except:
+            self.cache = None
+            print("⚠️  Warning: Redis not available. Caching disabled.")
     
     async def analyze_post_sentiment(
         self,
