@@ -1,0 +1,28 @@
+<footer class="site-footer">
+    <div class="wrapper">
+        <div class="footer-grid">
+            <section>
+                <h4>{{ site.title }}</h4>
+                <p>{{ site.description }}</p>
+            </section>
+            <section>
+                <h4>Connect</h4>
+                <ul>
+                    <li><a href="https://github.com/{{ site.social.github }}" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                    <li><a href="https://linkedin.com/in/{{ site.social.linkedin }}" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                    <li><a href="mailto:{{ site.email }}">Email</a></li>
+                    <li><a href="{{ site.social.portfolio }}" target="_blank" rel="noopener noreferrer">Portfolio</a></li>
+                </ul>
+            </section>
+            <section>
+                <h4>Newsletter</h4>
+                <p>최신 기술 인사이트와 개발 소식을 받아보세요.</p>
+                <form action="#" method="post" class="newsletter-form">
+                    <input type="email" name="email" placeholder="이메일 주소" required>
+                    <button type="submit">구독</button>
+                </form>
+            </section>
+        </div>
+        <p class="footer-copy">© {{ site.time | date: '%Y' }} {{ site.author }}. All rights reserved.</p>
+    </div>
+</footer>

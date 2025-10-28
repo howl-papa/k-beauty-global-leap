@@ -1,0 +1,35 @@
+---
+layout: default
+---
+
+<section class="home">
+  <header class="home-header">
+    <h2>최신 글</h2>
+    <p>K-Beauty Global Leap 프로젝트의 기술적 여정을 따라가 보세요.</p>
+  </header>
+
+  <ul class="post-list">
+    {% for post in paginator.posts %}
+      <li>
+        <span class="post-meta">{{ post.date | date: "%Y년 %m월 %d일" }} · {{ post.content | reading_time }}</span>
+        <a class="post-link" href="{{ post.url | relative_url }}">
+          <h2>{{ post.title }}</h2>
+        </a>
+        {% if post.subtitle %}
+          <p>{{ post.subtitle }}</p>
+        {% else %}
+          <p>{{ post.excerpt | strip_html | truncate: 180 }}</p>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+
+  <nav class="pagination" role="navigation">
+    {% if paginator.previous_page %}
+      <a class="previous" href="{{ paginator.previous_page_path | relative_url }}">← 이전 글</a>
+    {% endif %}
+    {% if paginator.next_page %}
+      <a class="next" href="{{ paginator.next_page_path | relative_url }}">다음 글 →</a>
+    {% endif %}
+  </nav>
+</section>
