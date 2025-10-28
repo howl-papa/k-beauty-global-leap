@@ -76,10 +76,118 @@ K-Beauty Global Leap transforms how small and medium K-Beauty enterprises approa
 ### Prerequisites
 - Python 3.9+
 - Node.js 18+
-- PostgreSQL 13+
-- Docker & Docker Compose
+- PostgreSQL 13+ (or use Docker)
+- Redis (optional, for caching)
 
-### Installation
+### Option 1: Local Development (Recommended for Development)
+
+#### Backend Setup
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/howl-papa/k-beauty-global-leap.git
+cd k-beauty-global-leap
+```
+
+2. **Set up Python virtual environment**
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. **Install Python dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+4. **Set up environment variables**
+```bash
+# Create .env file in backend directory
+cat > .env << EOF
+DATABASE_URL=postgresql://user:password@localhost:5432/kbeauty
+JWT_SECRET_KEY=your-super-secret-key-change-this-in-production
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=10080
+REDIS_URL=redis://localhost:6379
+EOF
+```
+
+5. **Set up PostgreSQL database**
+```bash
+# Using psql
+createdb kbeauty
+
+# Or using Docker for PostgreSQL only
+docker run -d \
+  --name kbeauty-postgres \
+  -e POSTGRES_DB=kbeauty \
+  -e POSTGRES_USER=user \
+  -e POSTGRES_PASSWORD=password \
+  -p 5432:5432 \
+  postgres:15
+```
+
+6. **Run database migrations**
+```bash
+# Make sure you're in backend directory
+alembic upgrade head
+```
+
+7. **Import mock data (for testing)**
+```bash
+# Start Python interpreter
+python
+
+# In Python shell:
+from app.core.database import SessionLocal
+from app.services.instagram_service import InstagramService
+
+db = SessionLocal()
+service = InstagramService(db)
+import asyncio
+result = asyncio.run(service.import_mock_data("scripts/mock_instagram_data.json"))
+print(result)
+db.close()
+# Press Ctrl+D to exit
+```
+
+8. **Start the backend server**
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Backend will be available at: http://localhost:8000
+API Documentation: http://localhost:8000/docs
+
+#### Frontend Setup
+
+1. **Open a new terminal and navigate to frontend directory**
+```bash
+cd frontend
+```
+
+2. **Install Node.js dependencies**
+```bash
+npm install
+```
+
+3. **Set up environment variables**
+```bash
+# Create .env.local file in frontend directory
+cat > .env.local << EOF
+NEXT_PUBLIC_API_URL=http://localhost:8000
+EOF
+```
+
+4. **Start the frontend development server**
+```bash
+npm run dev
+```
+
+Frontend will be available at: http://localhost:3000
+
+### Option 2: Docker Compose (Recommended for Quick Demo)
 
 1. **Clone the repository**
 ```bash
@@ -93,10 +201,60 @@ cp .env.example .env
 # Edit .env with your configuration
 ```
 
-3. **Start with Docker Compose**
+3. **Start all services with Docker Compose**
 ```bash
 docker-compose up -d
 ```
+
+4. **Run database migrations**
+```bash
+docker-compose exec backend alembic upgrade head
+```
+
+5. **Import mock data**
+```bash
+# Using the API endpoint (requires authentication)
+# First, signup a user via http://localhost:3000/signup
+# Then, use the import endpoint via API docs at http://localhost:8000/docs
+```
+
+Services:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+- PostgreSQL: localhost:5432
+- Redis: localhost:6379
+
+### First Steps After Installation
+
+1. **Create an account**
+   - Navigate to http://localhost:3000/signup
+   - Fill in your details (email, password, company name)
+   - You'll be automatically logged in
+
+2. **Import mock data (if not done already)**
+   - Go to API docs: http://localhost:8000/docs
+   - Find `POST /api/v1/instagram/import-mock-data`
+   - Click "Try it out" → "Execute"
+   - This imports 150 posts, 37 hashtags, and 36 influencers
+
+3. **Explore the dashboard**
+   - **Trend Analysis**: http://localhost:3000/dashboard/trend-analysis
+     - View trending hashtags by market
+     - Analyze engagement patterns
+     - See optimal posting times
+   - **Influencer Discovery**: http://localhost:3000/dashboard/influencers
+     - Search for micro-influencers
+     - Filter by engagement, authenticity
+     - View cost estimates
+
+4. **Test the API**
+   - API Documentation: http://localhost:8000/docs
+   - Try different endpoints:
+     - `GET /api/v1/instagram/posts?market=germany&limit=10`
+     - `GET /api/v1/instagram/hashtags/trending?market=france`
+     - `GET /api/v1/instagram/influencers?market=japan&min_followers=20000`
+     - `GET /api/v1/instagram/insights/germany`
 
 4. **Initialize database**
 ```bash
