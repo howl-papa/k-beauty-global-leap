@@ -34,6 +34,7 @@ class Analysis(Base):
     
     # Relationships
     user = relationship("User", back_populates="analyses")
+    instagram_posts = relationship("InstagramPost", back_populates="analysis", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Analysis(id={self.id}, type='{self.type}', status='{self.status}')>"

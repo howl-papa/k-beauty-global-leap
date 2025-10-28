@@ -8,6 +8,14 @@ from app.schemas.user import (
     TokenData,
 )
 
+from app.schemas.instagram import (
+    InstagramPostResponse,
+    InstagramHashtagResponse,
+    InstagramInfluencerResponse,
+    MarketInsightsResponse,
+    PostAnalyticsResponse,
+)
+
 __all__ = [
     "UserBase",
     "UserCreate",
@@ -16,4 +24,9 @@ __all__ = [
     "UserInDB",
     "Token",
     "TokenData",
+    "InstagramPostResponse",
+    "InstagramHashtagResponse",
+    "InstagramInfluencerResponse",
+    "MarketInsightsResponse",
+    "PostAnalyticsResponse",
 ]
