@@ -19,6 +19,11 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
+    # Instagram Integration
+    instagram_access_token = Column(String, nullable=True)
+    instagram_user_id = Column(String, nullable=True)
+    instagram_token_expires_at = Column(DateTime, nullable=True)
+    
     # Relationships
     company = relationship("Company", back_populates="user", uselist=False)
     analyses = relationship("Analysis", back_populates="user")

@@ -68,11 +68,23 @@ ACCESS_TOKEN_EXPIRE_MINUTES=10080
 # Redis (Optional)
 REDIS_URL=redis://localhost:6379
 
+# AI APIs (Optional - enables real AI analysis)
+# Get your API key from https://platform.openai.com/api-keys
+OPENAI_API_KEY=sk-your-openai-api-key-here
+ANTHROPIC_API_KEY=
+PINECONE_API_KEY=
+PINECONE_ENVIRONMENT=
+
 # API Settings
 API_V1_STR=/api/v1
 PROJECT_NAME=K-Beauty Global Leap
 EOF
 ```
+
+**🤖 AI Features Configuration**:
+- **With OPENAI_API_KEY**: Real GPT-4 powered sentiment analysis, trend insights, and market recommendations
+- **Without OPENAI_API_KEY**: Uses comprehensive mock data for demos - fully functional MVP
+- Get your OpenAI API key: https://platform.openai.com/api-keys
 
 **Generate a secure JWT secret:**
 ```bash

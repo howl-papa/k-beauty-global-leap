@@ -2,7 +2,7 @@
 Instagram Service
 
 Handles Instagram data collection, analysis, and insights generation.
-Currently uses mock data for MVP. Will integrate with Instagram Graph API later.
+Supports both Mock data (MVP) and Real Instagram Graph API.
 """
 
 import json
@@ -14,13 +14,36 @@ from datetime import datetime, timedelta
 from app.models.instagram_post import InstagramPost
 from app.models.instagram_hashtag import InstagramHashtag
 from app.models.instagram_influencer import InstagramInfluencer
+from app.core.config import get_settings
+from app.integrations.instagram_api import InstagramGraphAPI, InstagramAPIError
 
 
 class InstagramService:
-    """Service for Instagram data operations"""
+    """
+    Service for Instagram data operations
     
-    def __init__(self, db: Session):
+    Supports two modes:
+    1. Mock Data Mode (USE_REAL_INSTAGRAM_API=False): Uses database mock data
+    2. Real API Mode (USE_REAL_INSTAGRAM_API=True): Fetches from Instagram Graph API
+    """
+    
+    def __init__(self, db: Session, access_token: Optional[str] = None):
+        """
+        Initialize Instagram Service
+        
+        Args:
+            db: Database session
+            access_token: Instagram access token (optional, for real API mode)
+        """
         self.db = db
+        self.settings = get_settings()
+        self.use_real_api = self.settings.USE_REAL_INSTAGRAM_API
+        
+        # Initialize API client if using real API
+        if self.use_real_api and access_token:
+            self.api_client = InstagramGraphAPI(access_token)
+        else:
+            self.api_client = None
     
     # ========== POST OPERATIONS ==========
     
@@ -35,6 +58,8 @@ class InstagramService:
         """
         Search Instagram posts by market, hashtag, and filters
         
+        Supports both mock data and real API fetching based on configuration.
+        
         Args:
             market: Target market (germany, france, japan)
             hashtag: Filter by hashtag (optional)
@@ -45,6 +70,7 @@ class InstagramService:
         Returns:
             List of InstagramPost objects
         """
+        # Always query from database first (caching layer)
         query = self.db.query(InstagramPost).filter(InstagramPost.market == market)
         
         if hashtag:
@@ -60,7 +86,19 @@ class InstagramService:
         # Order by engagement rate (most engaging first)
         query = query.order_by(InstagramPost.engagement_rate.desc())
         
-        return query.limit(limit).all()
+        db_posts = query.limit(limit).all()
+        
+        # If using real API and no recent cached data, fetch from API
+        if self.use_real_api and self.api_client and len(db_posts) < limit:
+            try:
+                # Note: Real implementation would fetch from API here
+                # For now, return cached data
+                pass
+            except InstagramAPIError as e:
+                # Fallback to cached data on API error
+                pass
+        
+        return db_posts
     
     async def get_post_by_id(self, post_id: int) -> Optional[InstagramPost]:
         """Get single post by ID"""

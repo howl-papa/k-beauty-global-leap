@@ -12,6 +12,7 @@ from app.core.database import get_db
 from app.api.dependencies.auth import get_current_active_user
 from app.models.user import User
 from app.services.instagram_service import InstagramService
+from app.services.ai_analyzer import AIAnalyzer
 from app.schemas.instagram import (
     InstagramPostResponse,
     InstagramHashtagResponse,
@@ -329,3 +330,152 @@ async def import_mock_data(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to import mock data: {str(e)}"
         )
+
+
+# ========== AI ANALYSIS ENDPOINTS ==========
+
+@router.post("/ai/analyze-sentiment")
+async def analyze_sentiment(
+    market: str = Query(..., description="Target market (germany, france, japan)"),
+    hashtag: Optional[str] = Query(None, description="Filter by hashtag"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    limit: int = Query(50, ge=10, le=100, description="Number of posts to analyze"),
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    AI-powered sentiment analysis of Instagram posts
+    
+    Uses GPT-4 to analyze:
+    - Overall sentiment (positive/neutral/negative)
+    - Key themes and trending topics
+    - Consumer preferences
+    - Content insights
+    - Market insights
+    - Actionable recommendations
+    
+    **Note**: Requires OPENAI_API_KEY in environment. Falls back to mock data otherwise.
+    """
+    # Get posts matching criteria
+    instagram_service = InstagramService(db)
+    posts = await instagram_service.search_posts(
+        market=market,
+        hashtag=hashtag,
+        category=category,
+        limit=limit
+    )
+    
+    if not posts:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No posts found matching criteria"
+        )
+    
+    # Run AI analysis
+    ai_analyzer = AIAnalyzer(db)
+    analysis = await ai_analyzer.analyze_post_sentiment(posts=posts, market=market)
+    
+    return analysis
+
+
+@router.post("/ai/trend-insights")
+async def generate_trend_insights(
+    market: str = Query(..., description="Target market (germany, france, japan)"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    time_period: str = Query("recent", description="Time period (recent, weekly, monthly)"),
+    limit: int = Query(20, ge=5, le=50, description="Number of hashtags to analyze"),
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    AI-powered trend insights from hashtag data
+    
+    Uses GPT-4 to generate:
+    - Emerging trends
+    - Declining trends
+    - Seasonal patterns
+    - Competitive landscape analysis
+    - Consumer behavior insights
+    - Marketing recommendations
+    - Trend predictions
+    
+    **Note**: Requires OPENAI_API_KEY in environment. Falls back to mock data otherwise.
+    """
+    # Get trending hashtags
+    instagram_service = InstagramService(db)
+    hashtags = await instagram_service.get_trending_hashtags(
+        market=market,
+        category=category,
+        limit=limit
+    )
+    
+    if not hashtags:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No trending hashtags found for this market"
+        )
+    
+    # Generate AI insights
+    ai_analyzer = AIAnalyzer(db)
+    insights = await ai_analyzer.generate_trend_insights(
+        hashtags=hashtags,
+        market=market,
+        time_period=time_period
+    )
+    
+    return insights
+
+
+@router.post("/ai/market-entry-recommendations")
+async def get_market_entry_recommendations(
+    market: str = Query(..., description="Target market (germany, france, japan)"),
+    product_category: str = Query(..., description="Product category (skincare, makeup, haircare)"),
+    brand_name: Optional[str] = Query(None, description="Brand name (optional)"),
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """
+    AI-powered market entry recommendations
+    
+    Uses GPT-4 to generate comprehensive strategy including:
+    - Market assessment (opportunity score, difficulty, maturity)
+    - Entry strategy and positioning
+    - Go-to-market plan (30/90/180 days)
+    - Content strategy
+    - Partnership recommendations
+    - Risk mitigation
+    - Investment estimates
+    
+    **Note**: Requires OPENAI_API_KEY in environment. Falls back to mock data otherwise.
+    """
+    # Validate inputs
+    valid_markets = ["germany", "france", "japan"]
+    valid_categories = ["skincare", "makeup", "haircare"]
+    
+    if market not in valid_markets:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid market. Must be one of: {', '.join(valid_markets)}"
+        )
+    
+    if product_category not in valid_categories:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid category. Must be one of: {', '.join(valid_categories)}"
+        )
+    
+    # Build brand profile
+    brand_profile = {}
+    if brand_name:
+        brand_profile["brand_name"] = brand_name
+        brand_profile["category"] = product_category
+    
+    # Generate AI recommendations
+    ai_analyzer = AIAnalyzer(db)
+    recommendations = await ai_analyzer.generate_market_entry_recommendations(
+        market=market,
+        product_category=product_category,
+        brand_profile=brand_profile if brand_profile else None
+    )
+    
+    return recommendations

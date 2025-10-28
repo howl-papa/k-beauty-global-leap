@@ -33,6 +33,9 @@ llama-index==0.9.13
 pinecone-client==2.2.4
 sentence-transformers==2.2.2
 
+# HTTP Client
+httpx==0.25.2
+
 # Data processing
 pandas==2.1.4
 numpy==1.25.2

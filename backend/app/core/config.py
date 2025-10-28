@@ -28,8 +28,14 @@ class Settings(BaseSettings):
     PINECONE_API_KEY: Optional[str] = None
     PINECONE_ENVIRONMENT: Optional[str] = None
     
-    # Social Media APIs
+    # Instagram Graph API
+    INSTAGRAM_APP_ID: Optional[str] = None
+    INSTAGRAM_APP_SECRET: Optional[str] = None
     INSTAGRAM_ACCESS_TOKEN: Optional[str] = None
+    INSTAGRAM_REDIRECT_URI: str = "http://localhost:8000/api/v1/instagram/callback"
+    USE_REAL_INSTAGRAM_API: bool = False  # Toggle between real API and mock data
+    
+    # Other Social Media APIs
     TIKTOK_ACCESS_TOKEN: Optional[str] = None
     YOUTUBE_API_KEY: Optional[str] = None
     
@@ -42,6 +48,11 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+
+
+def get_settings() -> Settings:
+    """Get application settings (singleton pattern)"""
+    return Settings()
 
 
 settings = Settings()
