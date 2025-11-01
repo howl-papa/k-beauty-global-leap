@@ -251,3 +251,46 @@ async def delete_analysis(
     db.commit()
     
     return None
+
+
+@router.get(
+    "/analyses/{analysis_id}/pdf",
+    summary="Generate PDF Report",
+    description="Generate and download PDF compliance report for an analysis"
+)
+async def generate_pdf_report(
+    analysis_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Generate PDF report for analysis"""
+    from fastapi.responses import StreamingResponse
+    from app.services.pdf_report_service import PDFReportService
+    
+    service = RegTechService(db)
+    analysis = service.get_analysis_by_id(analysis_id, current_user.id)
+    
+    if not analysis:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Analysis not found"
+        )
+    
+    try:
+        pdf_service = PDFReportService()
+        pdf_buffer = pdf_service.generate_compliance_report(analysis)
+        
+        filename = f"compliance_report_{analysis.product_name.replace(' ', '_')}_{analysis.id}.pdf"
+        
+        return StreamingResponse(
+            pdf_buffer,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"PDF generation failed: {str(e)}"
+        )
