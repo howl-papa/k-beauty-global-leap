@@ -43,6 +43,9 @@ aiohttp==3.9.1
 beautifulsoup4==4.12.2
 requests==2.31.0
 
+# PDF generation
+reportlab==4.0.7
+
 # Background tasks
 celery==5.3.4
 flower==2.0.1
